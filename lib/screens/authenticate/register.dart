@@ -1,4 +1,5 @@
 import 'package:brew_crew/services/auth.dart';
+import 'package:brew_crew/shared/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:brew_crew/shared/constant.dart';
 
@@ -17,10 +18,11 @@ class _RegisterState extends State<Register> {
   String email = '';
   String password = '';
   String error = '';
+  bool loading = false;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return loading ? LoadingGreen() : Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green[200],
         title: Text(
@@ -81,10 +83,12 @@ class _RegisterState extends State<Register> {
                 child: ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState.validate()) {
+                        setState(() => loading = true);
                         dynamic result = await _auth.registerWithEmail(email, password);
                         if(result == null){
                           setState(() {
                             error = 'Please enter valid user name and password';
+                            loading = false;
                           });
                         }
                       }
