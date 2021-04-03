@@ -1,11 +1,12 @@
 import 'package:brew_crew/services/auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:brew_crew/shared/constant.dart';
 
 class SignIn extends StatefulWidget {
-
   final Function toggleView;
-  SignIn({ this.toggleView});
+
+  SignIn({this.toggleView});
 
   @override
   _SignInState createState() => _SignInState();
@@ -13,9 +14,11 @@ class SignIn extends StatefulWidget {
 
 class _SignInState extends State<SignIn> {
   final AuthService _auth = AuthService();
+  final _formKey = GlobalKey<FormState>();
 
   String email = '';
   String password = '';
+  String error = '';
 
   @override
   Widget build(BuildContext context) {
@@ -30,17 +33,14 @@ class _SignInState extends State<SignIn> {
         ),
         actions: [
           TextButton.icon(
-              onPressed: (){
-                widget.toggleView();
-              },
-              icon: Icon(Icons.how_to_reg_outlined,
-              color: Colors.blue[900]),
-              label: Text(
-                'Sign Up',
-                style: TextStyle(
-                  color: Colors.blue[900]
-              ),
-              ),
+            onPressed: () {
+              widget.toggleView();
+            },
+            icon: Icon(Icons.how_to_reg_outlined, color: Colors.blue[900]),
+            label: Text(
+              'Sign Up',
+              style: TextStyle(color: Colors.blue[900]),
+            ),
           )
         ],
       ),
@@ -48,13 +48,20 @@ class _SignInState extends State<SignIn> {
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 40, vertical: 30),
         child: Form(
+          key: _formKey,
           child: Column(
             children: [
-              TextFormField(onChanged: (val) {
-                setState(()=> email = val);
-              }),
+              TextFormField(
+                  decoration: TextInputDecoration.copyWith(hintText: 'Email'),
+                  onChanged: (val) {
+                    setState(() => email = val);
+                  },
+                  validator: (val) => val.isEmpty ? 'Enter your email' : null),
               SizedBox(height: 20),
               TextFormField(
+                  decoration: TextInputDecoration.copyWith(hintText: 'Password'),
+                  validator: (val) =>
+                      val.length < 6 ? 'Enter valid password' : null,
                   obscureText: true,
                   onChanged: (val) {
                     setState(() => password = val);
@@ -74,12 +81,19 @@ class _SignInState extends State<SignIn> {
                   ],
                 ),
                 child: ElevatedButton(
-                    onPressed: () {
-                      print(email);
-                      print(password);
+                    onPressed: () async {
+                      if (_formKey.currentState.validate()) {
+                        dynamic result = await _auth
+                            .signInWithEmailAndPasswords(email, password);
+                        if (result == null) {
+                          setState(() {
+                            error = 'Please enter valid user name and password';
+                          });
+                        }
+                      }
                     },
                     child: Text(
-                      'Sign Up',
+                      'Sign In',
                       style: TextStyle(color: Colors.blue[900]),
                     ),
                     style: ButtonStyle(
@@ -95,7 +109,8 @@ class _SignInState extends State<SignIn> {
                         },
                       ),
                     )),
-              )
+              ),
+              Text(error)
             ],
           ),
         ),

@@ -1,11 +1,11 @@
 import 'package:brew_crew/services/auth.dart';
 import 'package:flutter/material.dart';
+import 'package:brew_crew/shared/constant.dart';
 
 class Register extends StatefulWidget {
-
   final Function toggleView;
 
-  Register({ this.toggleView});
+  Register({this.toggleView});
 
   @override
   _RegisterState createState() => _RegisterState();
@@ -13,8 +13,10 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   final AuthService _auth = AuthService();
+  final _formKey = GlobalKey<FormState>();
   String email = '';
   String password = '';
+  String error = '';
 
   @override
   Widget build(BuildContext context) {
@@ -29,18 +31,13 @@ class _RegisterState extends State<Register> {
         ),
         actions: [
           TextButton.icon(
-            onPressed: (){
+            onPressed: () {
               widget.toggleView();
             },
-            icon: Icon(
-                Icons.login_outlined,
-                color: Colors.green[900]
-            ),
+            icon: Icon(Icons.login_outlined, color: Colors.green[900]),
             label: Text(
-                'Sign In',
-              style: TextStyle(
-                  color: Colors.green[900]
-              ),
+              'Sign In',
+              style: TextStyle(color: Colors.green[900]),
             ),
           )
         ],
@@ -49,13 +46,20 @@ class _RegisterState extends State<Register> {
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 40, vertical: 30),
         child: Form(
+          key: _formKey,
           child: Column(
             children: [
-              TextFormField(onChanged: (val) {
-                setState(()=> email = val);
-              }),
+              TextFormField(
+                decoration: TextInputDecoration.copyWith(hintText: 'Email'),
+                onChanged: (val) {
+                  setState(() => email = val);
+                },
+                validator: (val) => val.isEmpty ? 'Enter your email' : null,
+              ),
               SizedBox(height: 20),
               TextFormField(
+                  decoration: TextInputDecoration.copyWith(hintText: 'Password'),
+                  validator: (val) => val.length < 6 ? 'Enter valid password' : null,
                   obscureText: true,
                   onChanged: (val) {
                     setState(() => password = val);
@@ -75,16 +79,23 @@ class _RegisterState extends State<Register> {
                   ],
                 ),
                 child: ElevatedButton(
-                    onPressed: () {
-                      print(email);
-                      print(password);
+                    onPressed: () async {
+                      if (_formKey.currentState.validate()) {
+                        dynamic result = await _auth.registerWithEmail(email, password);
+                        if(result == null){
+                          setState(() {
+                            error = 'Please enter valid user name and password';
+                          });
+                        }
+                      }
                     },
                     child: Text(
                       'Register',
-                      style: TextStyle(color: Colors.green[900],
-                      letterSpacing: 2,
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: Colors.green[900],
+                          letterSpacing: 2,
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold),
                     ),
                     style: ButtonStyle(
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -93,11 +104,15 @@ class _RegisterState extends State<Register> {
                         ),
                       ),
                       backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                            (Set<MaterialState> states) {
-                          return Colors.green[200]; // Use the component's default.
+                        (Set<MaterialState> states) {
+                          return Colors
+                              .green[200]; // Use the component's default.
                         },
                       ),
                     )),
+              ),
+              Text(
+                error
               )
             ],
           ),
