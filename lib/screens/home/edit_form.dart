@@ -49,7 +49,7 @@ class _EditFormState extends State<EditForm> {
             ),
             SizedBox(height: 10),
             DropdownButtonFormField(
-              items: sugars.map((sugar) {
+              items: sugars.map((sugar){
                 return DropdownMenuItem(
                   value: sugar,
                   child: Text('$sugar'),
