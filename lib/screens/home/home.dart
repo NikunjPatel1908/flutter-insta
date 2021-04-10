@@ -1,4 +1,5 @@
 import 'package:brew_crew/models/brew.dart';
+import 'package:brew_crew/screens/home/edit_form.dart';
 import 'package:brew_crew/services/auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,7 @@ class Home extends StatelessWidget {
     void _editMenu(){
       showModalBottomSheet(context: context, builder: (context){
         return Container(
-          child: Text('Hello'),
+          child: EditForm(),
         );
       }
       );
